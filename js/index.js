@@ -14,15 +14,13 @@
         if (control !== null) {
          for ( let i = 0; i<control.length; i++) {
                 let tmpi = control[i];
-                let getls = JSON.parse(localStorage.getItem(tmpi));
-                // console.log(getls);
                 let addNewContact = doc.createElement('div');
-                addNewContact.id = tmpi;
-                addNewContact.innerHTML = '<div class="my-message"><p class="my-message-title">'+getls.lastname +' '+ getls.name +'</p></div>';
+                addNewContact.id = i;
+                addNewContact.innerHTML = '<div class="my-message"><p class="my-message-title">'+tmpi.lastname +' '+ tmpi.name +'</p></div>';
                 parent_block.appendChild(addNewContact);
             }
         } else {
-            console.log('End')
+            control = [];
         }
     }
 
@@ -102,8 +100,7 @@
             }
             someMailNumerator = 1;
 
-            // console.log(name, lastname, phone);
-            //Условия для сохранения данных(Валидность(наверное...))
+            //Условия на заполнение полей
                 //Подсказка на незаполненное поле
             if (name == ''){
                 doc.getElementById('name').style.backgroundColor = '#f1bdbd';
@@ -123,33 +120,15 @@
 
             //Собственно само условие!
             if (name !== '' && lastname !== '' && phone !== '') {
+            // control.unshift(tmparr);
+            control.push(tmparr);
+            localStorage.setItem('controlKey', JSON.stringify(control));
 
-            // значение нового ключа в controlKey
-            let arrcontrolKey = JSON.parse(localStorage.getItem('controlKey'));
-            if (arrcontrolKey !== null) {
-                var newCK = arrcontrolKey[arrcontrolKey.length - 1] + 1;  //ключ -> значение +1
-            } else {
-                 newCK = 0;
-            }
-
-            //Перезапись проверочного ключа(в localStorage) ControlKey
-            if (arrcontrolKey !== null) {
-            localStorage.setItem(newCK, JSON.stringify(tmparr));  //записываем новый объект в lS с ключем +1
-            var tmpCK = JSON.parse(localStorage.getItem('controlKey')); //вытаскиваем CK из lS
-            tmpCK.push(newCK); //пушим новое значение в массив
-            localStorage.setItem('controlKey', JSON.stringify(tmpCK)); // записываем новый CK в lS
-            } else {
-                nullCK =[0];
-                localStorage.setItem('controlKey', JSON.stringify(nullCK));
-                localStorage.setItem('0', JSON.stringify(tmparr));
-            }
-
-            //Запись нового контакта
+            //Запись нового контакта в тело документа
             var addNewContact = doc.createElement('div');
-            tmpCK = JSON.parse(localStorage.getItem('controlKey'));
             // console.log(tmpCK);
-            if (tmpCK.length>1){
-            addNewContact.id = tmpCK.length-1;
+            if (control.length>1){
+            addNewContact.id = control.length-1;
             } else {
                 addNewContact.id = 0;
             }
@@ -157,7 +136,7 @@
             parent_block.appendChild(addNewContact);
             closeW.remove();
             closeB.remove();
-            location.reload()  // перезагрузка страницы(увы без етого параметра не открывает контакт)
+            location.reload();  // перезагрузка страницы(увы без етого параметра не открывает контакт)
             };
         });
 
@@ -220,12 +199,12 @@
     //ДЕЙСТВИЯ ПО НАЖАТИЮ НА КОНТАКТ
     // console.log(control);
     if (control !== null) {
-        for ( let m=0; m<control.length; m++) {
-            let tmpCallBlock = control[m];  //controlKey[i]
-            let tmpID = doc.getElementById(tmpCallBlock);  //id тот же что и controlKey[i]
-            let tmpCount = m;
+        for ( let i=0; i<control.length; i++) {
+            let tmpCallBlock = control[i];  //controlKey[i]
+            let tmpID = doc.getElementById(i);  //id тот же что и controlKey[i]
+            let tmpCount = i;
             tmpID.addEventListener('click', function () {
-                var tmpArrReCall = JSON.parse(localStorage.getItem(tmpCallBlock));
+                var tmpArrReCall = control[tmpCount];
 
                 //СТРОИМ конструкцию под tmpArrReCall
                 let backing = doc.createElement('div');
@@ -416,11 +395,13 @@
                     if (name !== '' && lastname !== '' && phone !== '') {
 
                         //Перезапись ключа в localStorage
-                        localStorage.setItem(tmpCallBlock, JSON.stringify(tmparr));
+                        control[tmpCount] = tmparr;
+                        localStorage.setItem('controlKey', JSON.stringify(control));
 
                         //Перезапись контакта в parent_block
                         tmpID.remove(); //удаление старого контакта из parent_block
                         let addNewContact = doc.createElement('div');   // добавляем обновленные данные
+                        addNewContact.id = tmpCount;
                         addNewContact.innerHTML = '<div class="my-message"><span class="my-message-title">' + tmparr.lastname + ' ' + tmparr.name + '</span></div>';
                         parent_block.appendChild(addNewContact);
                         closeW.remove(); //закрытие окна контакта
@@ -432,23 +413,20 @@
                 //ДЕЙСТВИЯ ПО КНОПКЕ "DELETE"--------------------------------------
                 let deleteContact = doc.getElementById('del');
                 deleteContact.addEventListener('click', function () {
-                    localStorage.removeItem(tmpCallBlock);
-                    let tmpCK = JSON.parse(localStorage.getItem('controlKey'));
-                        // console.log('Массив из lS controlKey ['+tmpCK +']');
-                    tmpCK.splice(tmpCount, 1);  //удаляем элемент массива
-                        // console.log('Удаляемый элемент '+tmpCallBlock);
-                        // console.log('Массив после удаления элемента ['+tmpCK+']');
-                        // console.log('Длина массива '+tmpCK.length);
-                    localStorage.setItem('controlKey', JSON.stringify(tmpCK));
-                    // if (tmpCK.length === 1) {
-                    //     localStorage.removeItem("controlKey");
-                    //         console.log('ControlKey removed');
-                    // };
+                    if (control.length > 1){
+                        control.splice(tmpCount, 1);
+                        // console.log('Удаляем элемент ' +tmpCount);
+                        // console.log(control);
+                        localStorage.setItem('controlKey', JSON.stringify(control));
+                    } else {
+                        localStorage.removeItem('controlKey')
+                    }
 
-                    let child = doc.getElementById(tmpCallBlock);
+                    let child = doc.getElementById(tmpCount);
                     parent_block.removeChild(child);
                     closeW.remove();
                     closeB.remove();
+                    location.reload();
                 });
 
                 //ДЕЙСТВИЯ ПО КНОПКЕ [+] Phone
@@ -519,3 +497,4 @@
             }
         }
     });
+console.log(control);

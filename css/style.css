@@ -1,0 +1,127 @@
+.body {
+    margin: 0 0;
+    padding: 0 0;
+}
+.clearfix:after,
+.clearfix:before{
+    display: table;
+    content: '';
+}
+.clearfix:after{
+    clear: both;
+}
+.parent_block {
+    width: 375px;
+    margin: 0 auto;
+    position: relative;
+}
+.header {
+    box-sizing: border-box;
+    width: 100%;
+    background-color: darkgrey;
+    /*border: 1px solid #4b4b4b;*/
+    position: relative;
+}
+.input_zone {
+    border-radius: 5px;
+    width: 250px;
+    height: 40px;
+    font-size: 20px;
+    float: left;
+    margin: 10px 10px;
+}
+.add_contact {
+    position: relative;
+    border-radius: 5px;
+    background-color: white;
+    float: right;
+    width: 65px;
+    height: 40px;
+    margin: 10px 10px;
+}
+.serch_label {
+    position: absolute;
+}
+.my-message {
+    width: 100%;
+    box-sizing: border-box;
+    height: 50px;
+    border: 1px solid #797777;
+    background-color: #4b4b4b;
+    margin-top: -1px;
+}
+.my-message-title {
+    color: #eaeaea;
+    font-size: 30px;
+    margin: 6px 0 0 10px;
+    font-family: "Arial";
+}
+.my-message:hover {
+    background-color: #797777;
+    border-radius: 5px;
+}
+
+.my-message-title span {
+    vertical-align: middle;
+}
+/*.my-message-title:hover {*/
+    /*color: #232323;*/
+/*}*/
+/*   ADD   */
+.backing {
+    width: 100%;
+    height: 100%;
+    margin: 0 auto;
+    position: absolute;
+    top: 0;
+    background-color: #a40000;
+    opacity: 0.5;
+    -webkit-filter: blur(10px);
+    -moz-filter: blur(10px);
+    -o-filter: blur(10px);
+    -ms-filter: blur(10px);
+    filter: blur(10px);
+}
+.main_new_contact_block {
+    width: 100%;
+    background-color: darkgrey;
+    border: 1px solid #4b4b4b;
+    margin: -1px 0 0 -1px;
+    position: absolute;
+    z-index: 2;
+}
+.Del_Close_Save {
+    width: 100%;
+}
+.del {
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+    /*background-color: #a40000;*/
+    font-size: 20px;
+    margin: 5px 5px;
+    float: left;
+}
+.close {
+    width: 100px;
+    height: 40px;
+    border-radius: 5px;
+    font-size: 20px;
+    margin: 5px 5px;
+    float: right;
+}
+.save {
+    width: 100px;
+    height: 40px;
+    border-radius: 5px;
+    font-size: 20px;
+    margin: 5px 5px;
+    float: right;
+}
+.new_phone_mail {
+    border-radius: 5px;
+    margin: 11px 0 9px 5px;
+    width: 33px;
+    height: 45px;
+    font-size: 25px;
+}

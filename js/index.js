@@ -47,7 +47,7 @@
                     <button class="new_phone_mail" type="button" id="removePhone">-</button>\
                 </div>\
                 <div class="clearfix" id="inputMail">\
-                    <input type="email" name="mail" class="input_zone" placeholder="Mail" id="mail">\
+                    <input type="email" name="mail" class="input_zone" placeholder="Mail" id="mail1">\
                     <button class="new_phone_mail" type="button" id="addMail">+</button>\
                     <button class="new_phone_mail" type="button" id="removeMail">-</button>\
                 </div>\
@@ -71,7 +71,7 @@
             let name = document.getElementById("name").value;
             let lastname = document.getElementById("lastname").value;
             let phone = document.getElementById("phone").value;
-            let mail = document.getElementById("mail").value;
+            let mail = document.getElementById("mail1").value;
 
 
             var tmparr = { name: name,
@@ -91,14 +91,19 @@
             somePhoneNumerator = 1;
 
             if (someMailNumerator !== 1) {
-                for (let k=2; k<=someMailNumerator; k++) {
-                    let tmpArrMail = doc.getElementById("Mail" + k).value;
+                for (let m=2; m<=someMailNumerator; m++) {
+                    let tmpArrMail = doc.getElementById("Mail" + m).value;
                     if (tmpArrMail !== '') {
                         tmparr.mail.push(tmpArrMail);
                     }
                 }
             }
             someMailNumerator = 1;
+
+            //Условие на пропуск первого поля mail
+            if (tmparr.mail.length != 1 && tmparr.mail[0] == '') {
+                tmparr.mail.shift();
+            }
 
             //Условия на заполнение полей
                 //Подсказка на незаполненное поле
@@ -119,8 +124,7 @@
             };
 
             //Собственно само условие!
-            if (name !== '' && lastname !== '' && phone !== '') {
-            // control.unshift(tmparr);
+            if (name !== '' && lastname !== '' && phone !== '' && mailCorrect === true) {
             control.push(tmparr);
             localStorage.setItem('controlKey', JSON.stringify(control));
 
@@ -138,6 +142,26 @@
             closeB.remove();
             location.reload();  // перезагрузка страницы(увы без етого параметра не открывает контакт)
             };
+        });
+
+        // Предусловие для mail (доделать)
+        let mailCorrect = true;
+        let mail = doc.getElementById('mail' + someMailNumerator);
+
+        mail.addEventListener('input', function () {
+        if (mail.value.includes('@') === true && mail.value.includes('.') === true && mail.value.length >= 6) {
+                mailCorrect = true;
+                console.log(mailCorrect);
+                doc.getElementById('mail' + someMailNumerator).style.backgroundColor = '#97d696';
+            } else if (mail.value == '') {
+                mailCorrect = true;
+                console.log(mailCorrect);
+                doc.getElementById('mail' + someMailNumerator).style.backgroundColor = 'white';
+            } else {
+                mailCorrect = false;
+                console.log(mailCorrect);
+                doc.getElementById('mail' + someMailNumerator).style.backgroundColor = '#f1bdbd';
+            }
         });
 
         //Действия кнопки [+] Phone
@@ -172,16 +196,18 @@
         let inputMail = doc.getElementById('inputMail');
         let addMail = doc.getElementById('addMail');
         addMail.addEventListener('click', function () {
-            someMailNumerator++;
-            let someMail = "Mail" + someMailNumerator;
-            // console.log(someMail);
+            if (doc.getElementById('mail'+someMailNumerator).value.length > 5) {
+                someMailNumerator++;
+                let someMail = "mail" + someMailNumerator;
+                // console.log(someMail);
 
-            let newInput = doc.createElement('input');
-            newInput.id = someMail;
-            newInput.placeholder = someMail;
-            newInput.className = 'input_zone';
-            newInput.innerHTML = '<input type="email" name="mail">';
-            inputMail.appendChild(newInput);
+                let newInput = doc.createElement('input');
+                newInput.id = someMail;
+                newInput.placeholder = someMail;
+                newInput.className = 'input_zone';
+                newInput.innerHTML = '<input type="email" name="mail">';
+                inputMail.appendChild(newInput);
+            }
         });
 
         //Действия кнопки [-] Mail
@@ -189,7 +215,7 @@
         removeMail.addEventListener('click', function () {
             if (someMailNumerator>1){
                 // console.log(someMailNumerator);
-                let tmpRemoveMail = doc.getElementById("Mail"+someMailNumerator);
+                let tmpRemoveMail = doc.getElementById("mail"+someMailNumerator);
                 tmpRemoveMail.remove();
                 someMailNumerator--;
             }
@@ -248,7 +274,7 @@
                 lastnameZone.appendChild(contactProfileLastnameZone);
 
                 //PhoneZone
-                var phoneLegth = tmpArrReCall.phone.length;
+                var phoneLength = tmpArrReCall.phone.length;
                 //Первое(дефолтное поле ввода)
                 var inputPhone = doc.getElementById('inputPhone');
                 var firsPhone = doc.createElement('input');
@@ -275,8 +301,8 @@
                 inputPhone.appendChild(buttonPhoneRemove);
 
                 //Добавление остальных номеров
-                if (phoneLegth > 1) {
-                    for (var i=1; i<phoneLegth; i++) {
+                if (phoneLength > 1) {
+                    for (var i=1; i<phoneLength; i++) {
                         var anothetPhone = doc.createElement('input');
                         anothetPhone.className = 'input_zone';
                         anothetPhone.value = tmpArrReCall.phone[i];
@@ -289,12 +315,12 @@
                 }
 
                 //MailZone
-                let mailLegth = tmpArrReCall.mail.length;
+                let mailLength = tmpArrReCall.mail.length;
                 //Первое(дефолтное поле ввода)
                 let inputMail = doc.getElementById('inputMail');
                 let firsMail = doc.createElement('input');
                 firsMail.value = tmpArrReCall.mail[0];
-                firsMail.id = 'mail';
+                firsMail.id = 'mail1';
                 firsMail.className = 'input_zone';
                 firsMail.placeholder = 'Mail';
                 firsMail.innerHTML = '<input type="email" name="mail">';
@@ -315,8 +341,8 @@
                 inputMail.appendChild(buttonMailRemove);
 
                 //Добавление остальных номеров
-                if (mailLegth > 1) {
-                    for (let i=1; i<mailLegth; i++) {
+                if (mailLength > 1) {
+                    for (let i=1; i<mailLength; i++) {
                         let anothetMail = doc.createElement('input');
                         anothetMail.className = 'input_zone';
                         anothetMail.value = tmpArrReCall.mail[i];
@@ -344,7 +370,7 @@
                     let name = document.getElementById("name").value;
                     let lastname = document.getElementById("lastname").value;
                     let phone = document.getElementById("phone").value;
-                    let mail = document.getElementById("mail").value;
+                    let mail = document.getElementById("mail1").value;
 
 
                     let tmparr = { name: name,
@@ -373,6 +399,10 @@
                         }
                     }
 
+                    //Условие на пропуск первого поля mail
+                    if (tmparr.mail.length != 1 && tmparr.mail[0] == '') {
+                        tmparr.mail.shift();
+                    }
                     //Условие для сохранения
                         //Подсказка на незаполненное поле
                     if (name == ''){
@@ -399,14 +429,9 @@
                         localStorage.setItem('controlKey', JSON.stringify(control));
 
                         //Перезапись контакта в parent_block
-                        tmpID.remove(); //удаление старого контакта из parent_block
-                        let addNewContact = doc.createElement('div');   // добавляем обновленные данные
-                        addNewContact.id = tmpCount;
-                        addNewContact.innerHTML = '<div class="my-message"><span class="my-message-title">' + tmparr.lastname + ' ' + tmparr.name + '</span></div>';
-                        parent_block.appendChild(addNewContact);
+                        tmpID.innerHTML = '<div class="my-message"><span class="my-message-title">' + tmparr.lastname + ' ' + tmparr.name + '</span></div>';
                         closeW.remove(); //закрытие окна контакта
                         closeB.remove();
-                        location.reload()  // перезагрузка страницы(увы без етого параметра не открывает контакт)
                     };
                 });
 
@@ -426,7 +451,7 @@
                     parent_block.removeChild(child);
                     closeW.remove();
                     closeB.remove();
-                    location.reload();
+                    // location.reload();
                 });
 
                 //ДЕЙСТВИЯ ПО КНОПКЕ [+] Phone
@@ -497,4 +522,3 @@
             }
         }
     });
-//console.log(control);

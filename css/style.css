@@ -22,6 +22,36 @@
     /*border: 1px solid #4b4b4b;*/
     position: relative;
 }
+.complete {
+    position: absolute;
+    width: 60%;
+    height: 40px;
+    font-size: 25px;
+    border: 1px solid inherit;
+    border-radius: 22px;
+    color: white;
+    top: 40px;
+    left: 80px;
+    background-color: #27982b;
+    z-index: 1;
+    padding: 7px 0px 0px 11px;
+    display: none;
+}
+.prevention {
+    position: absolute;
+    width: 60%;
+    height: 40px;
+    font-size: 25px;
+    border: 1px solid inherit;
+    border-radius: 22px;
+    color: white;
+    top: 40px;
+    left: 80px;
+    background-color: #27982b;
+    z-index: 3;
+    padding: 7px 0px 0px 20px;
+    display: none;
+}
 .input_zone {
     border-radius: 5px;
     width: 250px;
@@ -53,7 +83,7 @@
 .my-message-title {
     color: #eaeaea;
     font-size: 30px;
-    margin: 6px 0 0 10px;
+    padding: 6px 0 0 10px;
     font-family: "Arial";
 }
 .my-message:hover {
@@ -64,9 +94,7 @@
 .my-message-title span {
     vertical-align: middle;
 }
-/*.my-message-title:hover {*/
-    /*color: #232323;*/
-/*}*/
+
 /*   ADD   */
 .backing {
     width: 100%;

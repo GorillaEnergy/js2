@@ -154,7 +154,6 @@
                 let tmpContactValue = tmparr.name.toLowerCase() +' '+ tmparr.lastname.toLowerCase();
                     if (tmpContactData === tmpContactValue) {
                         contactValidation = 0;
-                    } else {
                         Prevention();
                     }
             }
@@ -208,7 +207,7 @@
         if (doc.getElementById("phone" + somePhoneNumerator).value.length > 2) {
             somePhoneNumerator++;
             let somePhone = "phone" + somePhoneNumerator;
-            console.log(somePhone);
+            // console.log(somePhone);
 
             let newInput = doc.createElement('input');
             newInput.id = somePhone;
@@ -236,7 +235,7 @@
             let someMail = "mail" + someMailNumerator;
             let readOnlyMail = "mail" + (someMailNumerator-1);
             // console.log(readOnlyMail);
-            document.getElementById(readOnlyMail).setAttribute("readOnly","readOnly");
+            doc.getElementById(readOnlyMail).readOnly = true;
             mail = doc.getElementById('mail' + someMailNumerator);
             // console.log(someMail);
 
@@ -281,7 +280,7 @@
         // console.log(tmpMailID);
         // console.log(mail.value);
 
-            if (mail.value.indexOf('@') >= 0 && mail.value.indexOf('.') > mail.value.indexOf('@') +1 && mail.value.length > mail.value.indexOf('.') +2) {
+            if (mail.value.indexOf('@') > 0 && mail.value.indexOf('.') > mail.value.indexOf('@') +1 && mail.value.length > mail.value.indexOf('.') +2) {
                 mailCorrect = true;
                 permissionToNewMailInput = true;
                 doc.getElementById('mail' + someMailNumerator).style.backgroundColor = '#97d696';
@@ -317,7 +316,7 @@
     let hintPhone = function () {
         // let phone = doc.getElementById('phone' + somePhoneNumerator);
         let phone = doc.getElementById('phone1');
-        console.log('phone' + somePhoneNumerator);
+        // console.log('phone' + somePhoneNumerator);
         if (phone.value.length > 2){
             phone.style.backgroundColor = '#97D696'
         } else {
@@ -597,7 +596,6 @@
             // console.log(tmpContactValue +'  '+tmpContactData+'  '+contactValidation);
             if (tmpContactData === tmpContactValue) {
                 contactValidation = 0;
-                } else {
                 Prevention();
                 }
             }
@@ -628,7 +626,7 @@
         // console.log(tmpMailID);
         // console.log(mail.value);
 
-        if (mail.value.indexOf('@') >= 0 && mail.value.indexOf('.') > mail.value.indexOf('@') +1 && mail.value.length > mail.value.indexOf('.') +2) {
+        if (mail.value.indexOf('@') > 0 && mail.value.indexOf('.') > mail.value.indexOf('@') +1 && mail.value.length > mail.value.indexOf('.') +2) {
             mailCorrect = true;
             permissionToNewMailInput = true;
             doc.getElementById('mail' + SomeMailNumerator2).style.backgroundColor = '#97d696';
@@ -648,7 +646,7 @@
         if (doc.getElementById("phone" + SomePhoneNumerator2).value.length > 2) {
             SomePhoneNumerator2++;
             let somePhone = "phone" + SomePhoneNumerator2;
-            console.log(somePhone);
+            // console.log(somePhone);
 
             let newInput = doc.createElement('input');
             newInput.id = somePhone;
@@ -681,7 +679,7 @@
             let someMail = "mail" + SomeMailNumerator2;
             let readOnlyMail = "mail" + (SomeMailNumerator2 - 1);
             // console.log(readOnlyMail);
-            document.getElementById(readOnlyMail).setAttribute("readOnly", "readOnly");
+            document.getElementById(readOnlyMail).readOnly = true;
 
             let newInput = doc.createElement('input');
             newInput.id = someMail;

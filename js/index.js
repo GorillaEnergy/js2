@@ -4,17 +4,28 @@
     let main_block = doc.getElementById('main_block');
     let header = doc.getElementById('header');
     let search = doc.getElementById('search');
-    let somePhoneNumerator = 1;
-    let someMailNumerator = 1;
-    let mailCorrect = true;
-    let permissionToNewMailInput = false;
+    let somePhoneNumerator = 0;
+    let someMailNumerator = 0;
     let popupSave = doc.getElementById('saveComplete');
     let popupRemove = doc.getElementById('removeComplete');
     let prevention = doc.getElementById('prevention');
+    let popupPhoneValidation = doc.getElementById('PhoneValidation');
+    let popupMailValidation = doc.getElementById('MailValidation');
+    let mailValidation;
+    let tmparr;
+    let tmpPhoneArr = [];
+    let tmpMailArr = [];
+    let tmpPhoneID;
+    let tmpMailID;
+    let tmpPhoneValue;
+    let tmpMailValue;
+    let tmpRemoveId;
+    let tmpIdent;
+    let tmpPhoneValueSave;
+    let tmpMailValueSave;
 
     //  ЗАГРУЗКА СПИСКА ИЗ localStorage ----------------------------------------------
     var control = JSON.parse(localStorage.getItem('controlKey'));
-    // console.log(control.length);
     // window.onload = start();
     let start = function () {
         if (control !== null) {
@@ -23,7 +34,6 @@
                 let addNewContact = doc.createElement('div');
                 addNewContact.id = i;
                 addNewContact.className = 'my-message my-message-title';
-                // addNewContact.innerHTML = '<div class="my-message"><p class="my-message-title">'+tmpi.lastname +' '+ tmpi.name +'</p></div>';
                 addNewContact.innerHTML = tmpi.lastname +' '+ tmpi.name;
                 parent_block.appendChild(addNewContact);
             }
@@ -36,9 +46,8 @@
     //ДЕЙСТВИЯ ПО КНОПКЕ "ADD"--------------------------------------------------------
     //СОЗДАНИЕ МАКЕТА
     let addNewContact = function () {
-        // console.log(add.id);
         let backing = doc.createElement('div');
-        backing.innerHTML = '<div class="backing clearfix" id="backing"></div>'
+        backing.innerHTML = '<div class="backing clearfix" id="backing"></div>';
         main_block.appendChild(backing);
 
         let contactProfile = doc.createElement('div');
@@ -52,14 +61,12 @@
                     <input required placeholder="Lastname" class="input_zone" id="lastname" oninput="this.value=this.value.replace(/[^\\qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM]/ig, \'\')">\
                 </div>\
                 <div class="clearfix" id="inputPhone">\
-                    <input type="tel" oninput="this.value = this.value.replace (/\\D/, \'\')" name="phone" class="input_zone" placeholder="Phone" id="phone1">\
-                    <button class="new_phone_mail" type="button" id="addPhone">+</button>\
-                    <button class="new_phone_mail" type="button" id="removePhone">-</button>\
+                    <input type="tel" oninput="this.value = this.value.replace (/\\D/, \'\')" name="phone" class="input_zone" placeholder="Enter phone" id="phone">\
+                    <button class="add_new_phone_mail" type="button" id="addPhone">Add</button>\
                 </div>\
                 <div class="clearfix" id="inputMail">\
-                    <input type="email" name="mail" class="input_zone" placeholder="Mail" id="mail1">\
-                    <button class="new_phone_mail" type="button" id="addMail">+</button>\
-                    <button class="new_phone_mail" type="button" id="removeMail">-</button>\
+                    <input type="email" name="mail" class="input_zone" placeholder="Enter email" id="mail" oninput="ValidMail()">\
+                    <button class="add_new_phone_mail" type="button" id="addMail">Add</button>\
                 </div>\
             </div>';
         header.appendChild(contactProfile);
@@ -72,26 +79,15 @@
         let save = doc.getElementById('save');
         save.addEventListener('click', saveNewContact);
 
-        //Действия кнопки [+] Phone
+        //Действия кнопки [Add] Phone
         let addPhone = doc.getElementById('addPhone');
         let inputPhone = doc.getElementById('inputPhone');
         addPhone.addEventListener('click', addnewphone);
 
-        //Действия кнопки [-] Phone
-        let removePhone = doc.getElementById('removePhone');
-        removePhone.addEventListener('click', removenewphone);
-
-        //Действия кнопки [+] Mail
+        //Действия кнопки [Add] Mail
         let addMail = doc.getElementById('addMail');
         let inputMail = doc.getElementById('inputMail');
         addMail.addEventListener('click', addnewmail);
-
-        //Действия кнопки [-] Mail
-        let removeMail = doc.getElementById('removeMail');
-        removeMail.addEventListener('click', removenewmail);
-
-        //Валидация Mail input
-        inputMail.addEventListener('input', mailValidation);
 
         //Подсказка на Name
         let nameZone = doc.getElementById('name');
@@ -102,87 +98,85 @@
         lastnameZone.addEventListener('input', hintLastname);
 
         //Подсказка на Phone
-        let phoneZone = doc.getElementById('phone1');
+        let phoneZone = doc.getElementById('phone');
         phoneZone.addEventListener('input', hintPhone);
+
+        let name = document.getElementById("name").value;
+        let lastname = document.getElementById("lastname").value;
+        tmparr = { name: name,
+            lastname: lastname,
+            phone: [],
+            mail: []
+        };
     };
      add.addEventListener('click', addNewContact);
 
     //SAVE button
     let saveNewContact = function () {
-        let name = document.getElementById("name").value;
-        let lastname = document.getElementById("lastname").value;
-        let phone = document.getElementById("phone1").value;
-        let mail = document.getElementById("mail1").value;
+        tmparr.name = document.getElementById("name").value;
+        tmparr.lastname = document.getElementById("lastname").value;
+        tmparr.phone = [];
+        tmparr.mail = [];
 
-
-        let tmparr = { name: name,
-            lastname: lastname,
-            phone: [phone],
-            mail: [mail]
-        };
-
-        if (somePhoneNumerator !== 1) {
-            for (let j=2; j<=somePhoneNumerator; j++) {
-                let tmpArrPhone = doc.getElementById("phone" + j).value;
+        //Запись изменений PhoneZone в tmparr
+        if (somePhoneNumerator !== 0) {
+            for (let p=0; p<somePhoneNumerator; p++) {
+                let tmpArrPhone = doc.getElementById("phone" + (p+1)).value;
                 if (tmpArrPhone.length > 2) {
                     tmparr.phone.push(tmpArrPhone);
                 }
             }
         }
-        somePhoneNumerator = 1;
+        //Запись изменений MailZone в tmparr
+        if (someMailNumerator !== 0) {
+            for (let m=0; m<someMailNumerator; m++) {
 
-        if (someMailNumerator !== 1) {
-            for (let m=2; m<=someMailNumerator; m++) {
-                let tmpArrMail = doc.getElementById("mail" + m).value;
-                if (tmpArrMail !== '') {
+                let tmpArrMail = doc.getElementById("mail" + (m+1)).value;
+                var re = /^[\w-\.]+@[\w-]+\.[a-z]{2,4}$/i;
+                mailValidation = re.test(tmpArrMail);
+                // return mailValidation;
+
+                if (mailValidation === true){
                     tmparr.mail.push(tmpArrMail);
+                } else {
+                    doc.getElementById('mail' + (m+1)).style.backgroundColor = '#f1bdbd';
                 }
             }
         }
-        someMailNumerator = 1;
-
-        //Условие на пропуск первого поля mail
-        if (tmparr.mail.length != 1 && tmparr.mail[0] == '') {
-            tmparr.mail.shift();
-        }
-
-        //Условия на заполнение полей
+        //Условия на Совпадение контактов(по name, lastname)
         let contactValidation = 1;
-        if (control.length !== 0){
-            for (var i = 0; i<control.length; i++) {
-                let tmpContactData = control[i].name.toLowerCase() +' '+ control[i].lastname.toLowerCase();
-                let tmpContactValue = tmparr.name.toLowerCase() +' '+ tmparr.lastname.toLowerCase();
-                    if (tmpContactData === tmpContactValue) {
-                        contactValidation = 0;
-                        Prevention();
-                    }
+        if (control.length !== 0) {
+            for (var i = 0; i < control.length; i++) {
+                let tmpContactData = control[i].name.toLowerCase() + ' ' + control[i].lastname.toLowerCase();
+                let tmpContactValue = tmparr.name.toLowerCase() + ' ' + tmparr.lastname.toLowerCase();
+                if (tmpContactData === tmpContactValue) {
+                    contactValidation = 0;
+                    Prevention();
+                    doc.getElementById('name').style.backgroundColor = '#f1bdbd';
+                    doc.getElementById('lastname').style.backgroundColor = '#f1bdbd';
+                    setTimeout(function () {doc.getElementById('name').style.backgroundColor = '#97D696';}, 2000);
+                    setTimeout(function () {doc.getElementById('lastname').style.backgroundColor = '#97D696';}, 2000);
+                }
             }
         }
 
-        if (name.length >=2 && lastname.length >=2 && phone.length >= 3 && contactValidation !== 0 && mailCorrect === true) {
+        //Сохранение
+        if (tmparr.name.length >=2 && tmparr.lastname.length >=2 && tmparr.phone.length > 0 && contactValidation === 1) {
             if (control !== null){
                 control.push(tmparr);
             }
             localStorage.setItem('controlKey', JSON.stringify(control));
 
-            //Запись нового контакта в тело документа
-            var addNewContact = doc.createElement('div');
-            // console.log(tmpCK);
-            if (control == null){
-                // addNewContact.id = control.length-1;
-                addNewContact.id = 0;
-            } else {
-                // addNewContact.id = 0;
-                addNewContact.id = control.length-1;
+            tmpPhoneArr = [];
+            tmpMailArr = [];
+            if (control.length >= 1){
+                refreshContact();
             }
-            addNewContact.innerHTML = '<div class="my-message"><span class="my-message-title">'+tmparr.lastname +' '+ tmparr.name +'</span></div>';
-            parent_block.appendChild(addNewContact);
-
-            // if (control.length >= 1){
-            refreshContact();
-            // }
             closeContact();
             popupSaveComplete();
+
+            somePhoneNumerator = 0;
+            someMailNumerator = 0;
         }
     };
 
@@ -201,103 +195,415 @@
         setTimeout(function() {prevention.style.display = 'block';}, 100);
         setTimeout(function() {prevention.style.display = 'none';}, 2000);
     }
+    //Popup PhoneValidation
+    function PhoneValidation() {
+        setTimeout(function() {popupPhoneValidation.style.display = 'block';}, 100);
+        setTimeout(function() {popupPhoneValidation.style.display = 'none';}, 2000);
+    }
+    //Popup MailValidation
+    function popUpMailValidation() {
+        setTimeout(function() {popupMailValidation.style.display = 'block';}, 100);
+        setTimeout(function() {popupMailValidation.style.display = 'none';}, 2000);
+    }
 
-    //Действия кнопки [+] Phone
+    //Действия кнопки [Add] Phone
     let addnewphone = function () {
-        if (doc.getElementById("phone" + somePhoneNumerator).value.length > 2) {
+        let phoneInputField = doc.getElementById("phone");
+        let inputPhone = doc.getElementById('inputPhone');
+        let inputPhoneValue = doc.getElementById('phone').value;
+
+        let tmpPhoneValid = true;
+
+        if (tmpPhoneArr.length > 0)  {
+            for (var i=0 ; i<tmpPhoneArr.length; i++) {
+                if (inputPhoneValue === tmpPhoneArr[i]) {
+                    tmpPhoneValid = false;
+                    let tmpHint = doc.getElementById('phone' + (i+1));
+                    let tmpColor = tmpHint.style.backgroundColor;
+                    PhoneValidation();
+                    setTimeout(function() {tmpHint.style.backgroundColor = '#f1bdbd';}, 0);
+                    setTimeout(function() {tmpHint.style.backgroundColor = tmpColor;}, 2000);
+                    doc.getElementById('phone').style.backgroundColor = '#f1bdbd';
+                }
+            }
+        }
+
+        if (phoneInputField.value.length > 2 && tmpPhoneValid === true) {
+            tmpPhoneArr.push(inputPhoneValue);
+
             somePhoneNumerator++;
             let somePhone = "phone" + somePhoneNumerator;
-            // console.log(somePhone);
+            let someSave = "save" + somePhoneNumerator;
+            let someRemove = "remove" + somePhoneNumerator;
 
             let newInput = doc.createElement('input');
             newInput.id = somePhone;
+            newInput.name = somePhoneNumerator;
+            newInput.value = inputPhoneValue;
             newInput.placeholder = "Phone" + somePhoneNumerator;
             newInput.className = 'input_zone';
+            newInput.readOnly = true;
+            newInput.style.backgroundColor = '#97D696';
+            newInput.onfocus = tmpPhoneNumberAction;
+            newInput.onkeyup = tmpPhoneNumberActionOnKeyup;
+            newInput.onblur = tmpPhoneNumberActionOnBlur;
             newInput.oninput = function () {this.value = this.value.replace (/\D/, '')};
-            newInput.innerHTML = '<input type="tel" name="phone">';
             inputPhone.appendChild(newInput);
+
+            let newRemoveButton = doc.createElement('button');
+            newRemoveButton.id = someRemove;
+            newRemoveButton.name = somePhoneNumerator;
+            newRemoveButton.className = 'new_phone_mail';
+            newRemoveButton.type = 'button';
+            newRemoveButton.onclick = tmpPhoneNumberRemove;
+            newRemoveButton.style.backgroundColor = 'red';
+            // newRemoveButton.innerHTML = '<i class="fa fa-trash-o" aria-hidden="true" style="font-size: 30px; color: red; margin-left: -3px"></i>';
+            newRemoveButton.innerText = '-';
+            inputPhone.appendChild(newRemoveButton);
+
+            doc.getElementById('phone').value = '';
+            doc.getElementById('phone').style.backgroundColor = 'white';
         }
     };
 
-    //Действия кнопки [-] Phone
-    let removenewphone = function () {
-        if (somePhoneNumerator>1){
-            let tmpRemovePhone = doc.getElementById("phone"+somePhoneNumerator);
-            tmpRemovePhone.remove();
-            somePhoneNumerator--;
-        }
-    };
-
-    //Действия кнопки [+] Mail
+    //Действия кнопки [Add] Mail
     let addnewmail = function () {
-        if (permissionToNewMailInput === true) {
+        let mailInputField = doc.getElementById("mail");
+        let inputMail = doc.getElementById('inputMail');
+        let inputMailValue = doc.getElementById('mail').value;
+
+        let tmpMailResemblance = true;
+
+        if (tmpMailArr.length > 0)  {
+            for (var i=0 ; i<tmpMailArr.length; i++) {
+                if (inputMailValue === tmpMailArr[i]) {
+                    tmpMailResemblance = false;
+                    let tmpHint = doc.getElementById('mail' + (i+1));
+                    let tmpColor = tmpHint.style.backgroundColor;
+                    popUpMailValidation();
+                    setTimeout(function() {tmpHint.style.backgroundColor = '#f1bdbd';}, 0);
+                    setTimeout(function() {tmpHint.style.backgroundColor = tmpColor;}, 2000);
+                    doc.getElementById('mail').style.backgroundColor = '#f1bdbd';
+                }
+            }
+        }
+
+        if (mailInputField.value.length > 2 && tmpMailResemblance === true && mailValidation === true) {
+            tmpMailArr.push(inputMailValue);
+
             someMailNumerator++;
             let someMail = "mail" + someMailNumerator;
-            let readOnlyMail = "mail" + (someMailNumerator-1);
-            // console.log(readOnlyMail);
-            doc.getElementById(readOnlyMail).readOnly = true;
-            mail = doc.getElementById('mail' + someMailNumerator);
-            // console.log(someMail);
+            let someSave = "saveM" + someMailNumerator;
+            let someRemove = "removeM" + someMailNumerator;
 
             let newInput = doc.createElement('input');
             newInput.id = someMail;
-            newInput.placeholder = someMail;
+            newInput.name = someMailNumerator;
+            newInput.value = inputMailValue;
+            newInput.placeholder = "Mail" + someMailNumerator;
             newInput.className = 'input_zone';
-            newInput.setAttribute('input', mailValidation);
-            newInput.innerHTML = '<input type="email" name="mail">';
+            newInput.readOnly = true;
+            newInput.style.backgroundColor = '#97D696';
+            newInput.onfocus = tmpMailAction;
+            newInput.onkeyup = tmpMailActionOnKeyup;
+            newInput.oninput = ValidMailDynamicElem;
+            newInput.onblur = tmpMailActionOnBlur;
             inputMail.appendChild(newInput);
+
+            let newRemoveButton = doc.createElement('button');
+            newRemoveButton.id = someRemove;
+            newRemoveButton.name = someMailNumerator;
+            newRemoveButton.className = 'new_phone_mail';
+            newRemoveButton.type = 'button';
+            newRemoveButton.onclick = tmpMailRemove;
+            newRemoveButton.style.backgroundColor = 'red';
+            // newRemoveButton.innerHTML = '<i class="fa fa-trash-o" aria-hidden="true" style="font-size: 30px; color: red; margin-left: -3px"></i>';
+            newRemoveButton.innerText = '-';
+            inputMail.appendChild(newRemoveButton);
+
+            doc.getElementById('mail').value = '';
+            doc.getElementById('mail').style.backgroundColor = 'white';
         }
     };
 
-    //Действия кнопки [-] Mail
-    let removenewmail = function () {
-        if (someMailNumerator>1){
-            // console.log(someMailNumerator);
-            let tmpRemoveMail = doc.getElementById("mail"+someMailNumerator);
-            tmpRemoveMail.remove();
-            someMailNumerator--;
+    //Mail Validation
+    let ValidMail = function () {
+        var re = /^[\w-\.]+@[\w-]+\.[a-z]{2,4}$/i;
+        var mail = document.getElementById('mail').value;
+        mailValidation = re.test(mail);
+        if (mailValidation) {
+            document.getElementById('mail').style.background = '#97D696';
+        } else if (mail == '') {
+            document.getElementById('mail').style.background = 'white';
         } else {
-            doc.getElementById('mail1').readOnly = false;
+            document.getElementById('mail').style.background = '#f1bdbd';
         }
+        return mailValidation;
+
+    };
+
+    //Mail Validation Dynamic Elements
+    let ValidMailDynamicElem = function (e) {
+        var e = e || event;
+        var target = e.target || e.srcElement;
+        tmpMailID = target.id;
+
+        var re = /^[\w-\.]+@[\w-]+\.[a-z]{2,4}$/i;
+        var mail = document.getElementById(tmpMailID).value;
+        mailValidation = re.test(mail);
+        if (mailValidation) {
+            document.getElementById(tmpMailID).style.background = '#97D696';
+        } else if (mail == '') {
+            document.getElementById(tmpMailID).style.background = 'white';
+        } else {
+            document.getElementById(tmpMailID).style.background = '#f1bdbd';
+        }
+        return mailValidation;
+
+    };
+
+    //Действия по нажатию на tmpPhoneNumber
+    let tmpPhoneNumberAction = function (e) {
+
+        var e = e || event;
+        var target = e.target || e.srcElement;
+
+        tmpPhoneID = target.id;
+        tmpIdent = doc.getElementById(tmpPhoneID).name;
+        doc.getElementById(tmpPhoneID).readOnly = false;
+        doc.getElementById('remove' + tmpIdent).style.visibility = 'visible';
+        tmpPhoneValue = doc.getElementById(tmpPhoneID).value;
+    };
+
+    //Действия по нажатию на tmpMail
+    let tmpMailAction = function (e) {
+
+        var e = e || event;
+        var target = e.target || e.srcElement;
+
+        tmpMailID = target.id;
+        tmpIdent = doc.getElementById(tmpMailID).name;
+        doc.getElementById(tmpMailID).readOnly = false;
+        doc.getElementById('removeM' + tmpIdent).style.visibility = 'visible';
+        tmpMailValue = doc.getElementById(tmpMailID).value;
+    };
+
+    //Действия при onkeyup tmpPhoneNumber
+    let tmpPhoneNumberActionOnKeyup = function (e) {
+
+        var e = e || event;
+        var target = e.target || e.srcElement;
+
+        tmpPhoneID = target.id;
+        tmpIdent = doc.getElementById(tmpPhoneID).name;
+        tmpPhoneValueSave = doc.getElementById(tmpPhoneID).value;
+        tmpPhoneArr[tmpIdent-1] = tmpPhoneValueSave;
+        if (tmpPhoneValueSave.length < 3) {
+            doc.getElementById(tmpPhoneID).style.backgroundColor = '#f1bdbd';
+        } else {
+            doc.getElementById(tmpPhoneID).style.backgroundColor = '#97D696';
+        }
+    };
+
+    //Действия при onblur tmpPhoneNumber
+    let tmpPhoneNumberActionOnBlur = function (e) {
+
+        var e = e || event;
+        var target = e.target || e.srcElement;
+
+        tmpPhoneID = target.id;
+        tmpIdent = doc.getElementById(tmpPhoneID).name;
+        let removeButton = document.getElementById('remove'+ tmpIdent);
+        setTimeout(function () {removeButton.style.visibility = 'hidden'}, 200);
+
+    };
+    //Действия при onblur tmpMail
+    let tmpMailActionOnBlur = function (e) {
+
+        var e = e || event;
+        var target = e.target || e.srcElement;
+
+        tmpPhoneID = target.id;
+        tmpIdent = doc.getElementById(tmpPhoneID).name;
+        let removeButton = document.getElementById('removeM'+ tmpIdent);
+        setTimeout(function () {removeButton.style.visibility = 'hidden'}, 200);
+
+    };
+
+    // Действия при onkeyup tmpMail
+    let tmpMailActionOnKeyup = function (e) {
+
+        var e = e || event;
+        var target = e.target || e.srcElement;
+
+        tmpMailID = target.id;
+        tmpIdent = doc.getElementById(tmpMailID).name;
+        tmpMailValueSave = doc.getElementById(tmpMailID).value;
+        tmpMailArr[tmpIdent-1] = tmpMailValueSave;
+    };
+
+    //Действия при Удалении! tmpPhoneNumber
+    let tmpPhoneNumberRemove = function (e) {
+
+        var e = e || event;
+        var target = e.target || e.srcElement;
+
+        tmpRemoveId = target.id;
+        tmpIdent = doc.getElementById(tmpRemoveId).name;
+        let inputPhone = doc.getElementById('inputPhone');
+
+        if (tmpPhoneArr.length > 1) {
+            tmpPhoneArr.splice((tmpIdent-1), 1);
+            tmparr.phone.splice((tmpIdent-1), 1);
+            somePhoneNumerator--
+        } else {
+            tmpPhoneArr =[];
+            somePhoneNumerator = 0
+        }
+
+        for (var i=0; i<tmpPhoneArr.length+1; i++) {
+            let phone = doc.getElementById('phone' + (i+1));
+            let remove = doc.getElementById('remove' + (i+1));
+            inputPhone.removeChild(phone);
+            inputPhone.removeChild(remove);
+        }
+        buildPhones();
+    };
+
+    //Действия при Удалении! tmpMail
+    let tmpMailRemove = function (e) {
+
+        var e = e || event;
+        var target = e.target || e.srcElement;
+
+        tmpRemoveId = target.id;
+        tmpIdent = doc.getElementById(tmpRemoveId).name;
+        let inputMail = doc.getElementById('inputMail');
+
+        if (tmpMailArr.length > 1) {
+            tmpMailArr.splice((tmpIdent-1), 1);
+            tmparr.mail.splice((tmpIdent-1), 1);
+            someMailNumerator--
+        } else {
+            tmpMailArr =[];
+            someMailNumerator = 0
+        }
+
+        for (var i=0; i<tmpMailArr.length+1; i++) {
+            let mail = doc.getElementById('mail' + (i+1));
+            let remove = doc.getElementById('removeM' + (i+1));
+            inputMail.removeChild(mail);
+            inputMail.removeChild(remove);
+        }
+        buildMails();
+    };
+
+    //Запись(стройка) контактов с tmpPhoneArr
+    let buildPhones = function () {
+        somePhoneNumerator = 0;
+        for (x=0; x<tmpPhoneArr.length; x++) {
+            buildPhonesBody()
+        }
+    };
+    let buildPhonesBody = function () {
+            somePhoneNumerator++;
+            let inputPhone = doc.getElementById('inputPhone');
+            let somePhone = "phone" + somePhoneNumerator;
+            let someRemove = "remove" + somePhoneNumerator;
+            let inputPhoneValue = tmpPhoneArr[x];
+
+            let newInput = doc.createElement('input');
+            newInput.id = somePhone;
+            newInput.name = somePhoneNumerator;
+            newInput.value = inputPhoneValue;
+            newInput.placeholder = "Phone" + somePhoneNumerator;
+            newInput.className = 'input_zone';
+            newInput.readOnly = true;
+            if (inputPhoneValue.length >2) {
+                newInput.style.backgroundColor = '#97D696';
+            } else {
+                newInput.style.backgroundColor = '#f1bdbd';
+            }
+            newInput.onfocus = tmpPhoneNumberAction;
+            newInput.onkeyup = tmpPhoneNumberActionOnKeyup;
+            newInput.onblur = tmpPhoneNumberActionOnBlur;
+            newInput.oninput = function () {this.value = this.value.replace (/\D/, '')};
+            inputPhone.appendChild(newInput);
+
+            let newRemoveButton = doc.createElement('button');
+            newRemoveButton.id = someRemove;
+            newRemoveButton.name = somePhoneNumerator;
+            newRemoveButton.placeholder = "save" + somePhoneNumerator;
+            newRemoveButton.className = 'new_phone_mail';
+            newRemoveButton.type = 'button';
+            newRemoveButton.onclick = tmpPhoneNumberRemove;
+            newRemoveButton.style.backgroundColor = 'red';
+            // newRemoveButton.innerHTML = '<i class="fa fa-trash-o" aria-hidden="true" style="font-size: 30px; color: red; margin-left: -3px"></i>';
+            newRemoveButton.innerText = '-';
+            inputPhone.appendChild(newRemoveButton);
+    };
+
+    //Запись(стройка) контактов с tmpMailArr
+    let buildMails = function () {
+        someMailNumerator = 0;
+        for (y=0; y<tmpMailArr.length; y++) {
+            buildMailsBody()
+        }
+    };
+    let buildMailsBody = function () {
+        someMailNumerator++;
+        let inputMail = doc.getElementById('inputMail');
+        let someMail = "mail" + someMailNumerator;
+        let someRemove = "removeM" + someMailNumerator;
+        let inputMailValue = tmpMailArr[y];
+
+        let newInput = doc.createElement('input');
+        newInput.id = someMail;
+        newInput.name = someMailNumerator;
+        newInput.value = inputMailValue;
+        newInput.placeholder = "Mail" + someMailNumerator;
+        newInput.className = 'input_zone';
+        newInput.readOnly = true;
+        newInput.onfocus = tmpMailAction;
+        newInput.onkeyup = tmpMailActionOnKeyup;
+        newInput.oninput = ValidMailDynamicElem;
+        newInput.onblur = tmpMailActionOnBlur;
+        inputMail.appendChild(newInput);
+
+        var re = /^[\w-\.]+@[\w-]+\.[a-z]{2,4}$/i;
+        mailValidation = re.test(inputMailValue);
+        if (mailValidation === true){
+            newInput.style.backgroundColor = '#97D696';
+        } else {
+            newInput.style.backgroundColor = '#f1bdbd';
+        }
+
+        let newRemoveButton = doc.createElement('button');
+        newRemoveButton.id = someRemove;
+        newRemoveButton.name = someMailNumerator;
+        newRemoveButton.className = 'new_phone_mail';
+        newRemoveButton.type = 'button';
+        newRemoveButton.onclick = tmpMailRemove;
+        newRemoveButton.style.backgroundColor = 'red';
+        newRemoveButton.innerText = '-';
+        inputMail.appendChild(newRemoveButton);
     };
 
     //Перезалив контактов refreshContact
     let refreshContact = function () {
-            for (var x=0; x<control.length; x++) {
-                // console.log(control.length, x);
+            for (var x=0; x<control.length-1; x++) {
                 parent_block.removeChild(doc.getElementById(x));
             }
         start();
     };
-
-    //ВАЛИДАЦИЯ ПОЛЯ MAIL
-
-    let mailValidation = function (e) {
-        var e = e || event;
-        var target = e.target || e.srcElement;
-        tmpMailID = target.id;
-        let mail = doc.getElementById(tmpMailID);
-        // console.log(tmpMailID);
-        // console.log(mail.value);
-
-            if (mail.value.indexOf('@') > 0 && mail.value.indexOf('.') > mail.value.indexOf('@') +1 && mail.value.length > mail.value.indexOf('.') +2) {
-                mailCorrect = true;
-                permissionToNewMailInput = true;
-                doc.getElementById('mail' + someMailNumerator).style.backgroundColor = '#97d696';
-            } else if (mail.value == '') {
-                mailCorrect = true;
-                permissionToNewMailInput = false;
-                doc.getElementById('mail' + someMailNumerator).style.backgroundColor = 'white';
-            } else {
-                mailCorrect = false;
-                permissionToNewMailInput = false;
-                doc.getElementById('mail' + someMailNumerator).style.backgroundColor = '#f1bdbd';
-            }
+    let refreshContact2 = function () {
+        for (var x=0; x<control.length; x++) {
+            parent_block.removeChild(doc.getElementById(x));
+        }
+        start();
     };
-
     //Подсказка на Name, Lastname, Phone
     let hintName = function () {
-        // console.log('test');
         let name = doc.getElementById('name');
         if (name.value.length >= 2){
             name.style.backgroundColor = '#97D696'
@@ -314,12 +620,12 @@
         }
     };
     let hintPhone = function () {
-        // let phone = doc.getElementById('phone' + somePhoneNumerator);
-        let phone = doc.getElementById('phone1');
-        // console.log('phone' + somePhoneNumerator);
+        let phone = doc.getElementById('phone');
         if (phone.value.length > 2){
             phone.style.backgroundColor = '#97D696'
-        } else {
+        } else if (phone.value === ''){
+            phone.style.backgroundColor = 'white'
+        }else {
             phone.style.backgroundColor = '#f1bdbd'
         }
     };
@@ -331,11 +637,8 @@
         var e = e || event;
         var target = e.target || e.srcElement;
         tmpID = target.id;
-        // console.log(tmpID);
 
         let tmpArrReCall = control[tmpID];
-        // console.log(tmpArrReCall);
-        // console.log('test');
 
         //СТРОИМ конструкцию под tmpArrReCall
         let backing = doc.createElement('div');
@@ -352,8 +655,12 @@
                 <div class="clearfix" id="nameZone">\
                 </div>\
                 <div class="clearfix" id="inputPhone">\
+                    <input type="tel" oninput="this.value = this.value.replace (/\\D/, \'\')" name="phone" class="input_zone" placeholder="Enter phone" id="phone">\                    \
+                    <button class="add_new_phone_mail" type="button" id="addPhone">Add</button>\
                 </div>\
                 <div class="clearfix" id="inputMail">\
+                    <input type="email" name="mail" class="input_zone" placeholder="Enter email" id="mail" oninput="ValidMail()">\
+                    <button class="add_new_phone_mail" type="button" id="addMail">Add</button>\
                 </div>\
                 </div>';
         header.appendChild(contactProfileButtonZone);
@@ -383,90 +690,13 @@
         lastnameZone.appendChild(contactProfileLastnameZone);
 
         //PhoneZone
-        var phoneLength = tmpArrReCall.phone.length;
-        //Первое(дефолтное поле ввода)
-        var inputPhone = doc.getElementById('inputPhone');
-        var firsPhone = doc.createElement('input');
-        firsPhone.value = tmpArrReCall.phone[0];
-        firsPhone.id = 'phone1';
-        firsPhone.className = 'input_zone';
-        firsPhone.placeholder = 'Phone';
-        firsPhone.style.backgroundColor = '#97d696';
-        firsPhone.oninput = function () {this.value = this.value.replace (/\D/, '')};
-        firsPhone.innerHTML = '<input type="tel" name="phone"  oninput="this.value = this.value.replace (/\\D/, \'\')">';
-        inputPhone.appendChild(firsPhone);
-        //ButtonZone
-        let buttonPhoneAdd = doc.createElement('button');
-        buttonPhoneAdd.id = 'addPhone';
-        buttonPhoneAdd.className = 'new_phone_mail';
-        buttonPhoneAdd.type = 'button';
-        buttonPhoneAdd.innerHTML = '+';
-        inputPhone.appendChild(buttonPhoneAdd);
-
-        let buttonPhoneRemove = doc.createElement('button');
-        buttonPhoneRemove.id = 'removePhone';
-        buttonPhoneRemove.className = 'new_phone_mail';
-        buttonPhoneRemove.type = 'button';
-        buttonPhoneRemove.innerHTML = '-';
-        inputPhone.appendChild(buttonPhoneRemove);
-
-        //Добавление остальных номеров
-        if (phoneLength > 1) {
-            for (var i=1; i<phoneLength; i++) {
-                var anothetPhone = doc.createElement('input');
-                anothetPhone.className = 'input_zone';
-                anothetPhone.value = tmpArrReCall.phone[i];
-                anothetPhone.id = 'phone' + (i+1);
-                anothetPhone.placeholder = 'Phone'+ (i+1);
-                anothetPhone.style.backgroundColor = '#97d696';
-                anothetPhone.oninput = function () {this.value = this.value.replace (/\D/, '')};
-                anothetPhone.innerHTML = '<input type="tel" name="phone">';
-                inputPhone.appendChild(anothetPhone);
-            }
-        }
+        tmpPhoneArr = tmpArrReCall.phone;
+        buildPhones();
 
         //MailZone
-        let mailLength = tmpArrReCall.mail.length;
-        //Первое(дефолтное поле ввода)
-        let inputMail = doc.getElementById('inputMail');
-        let firsMail = doc.createElement('input');
-        firsMail.value = tmpArrReCall.mail[0];
-        firsMail.id = 'mail1';
-        firsMail.className = 'input_zone';
-        firsMail.placeholder = 'Mail';
-        if (tmpArrReCall.mail[0] !== '') {
-            firsMail.readOnly = 'readOnly';
-            firsMail.style.backgroundColor = '#97d696';
-        }
-        firsMail.innerHTML = '<input type="email" name="mail">';
-        inputMail.appendChild(firsMail);
-        let buttonMailAdd = doc.createElement('button');
-        buttonMailAdd.id = 'addMail';
-        buttonMailAdd.className = 'new_phone_mail';
-        buttonMailAdd.type = 'button';
-        buttonMailAdd.innerHTML = '+';
-        inputMail.appendChild(buttonMailAdd);
-
-        let buttonMailRemove = doc.createElement('button');
-        buttonMailRemove.id = 'removeMail';
-        buttonMailRemove.className = 'new_phone_mail';
-        buttonMailRemove.type = 'button';
-        buttonMailRemove.innerHTML = '-';
-        inputMail.appendChild(buttonMailRemove);
-
-        //Добавление остальных мейлов
-        if (mailLength > 1) {
-            for (let i=1; i<mailLength; i++) {
-                let anothetMail = doc.createElement('input');
-                anothetMail.className = 'input_zone';
-                anothetMail.value = tmpArrReCall.mail[i];
-                anothetMail.id = 'mail' + (i+1);
-                anothetMail.placeholder = 'Mail'+ (i+1);
-                anothetMail.readOnly = 'readOnly';
-                anothetMail.style.backgroundColor = '#97d696';
-                anothetMail.innerHTML = '<input type="email" name="mail">';
-                inputMail.appendChild(anothetMail);
-            }
+        tmpMailArr = tmpArrReCall.mail;
+        if (tmpMailArr.length !== 0) {
+            buildMails();
         }
 
         //CLOSE
@@ -476,44 +706,41 @@
         //SAVE
         let save = doc.getElementById('save');
         save.addEventListener('click', saveContact);
+        // save.addEventListener('click', saveNewContact);
 
         //DELETE
         let deleteContact = doc.getElementById('del');
         deleteContact.addEventListener('click', removeContact);
 
-        //ДЕЙСТВИЯ ПО КНОПКЕ [+] Phone
+        //Действия кнопки [Add] Phone
         let addPhone = doc.getElementById('addPhone');
-        SomePhoneNumerator2 = tmpArrReCall.phone.length;
-        addPhone.addEventListener('click', newPhoneInput);
+        let inputPhone = doc.getElementById('inputPhone');
+        addPhone.addEventListener('click', addnewphone);
 
-        //ДЕЙСТВИЯ ПО КНОПКЕ [-] Phone
-        let removePhone = doc.getElementById('removePhone');
-        removePhone.addEventListener('click', removePhoneInput);
-
-        //Действия кнопки [+] Mail
+        //Действия кнопки [Add] Mail
         let addMail = doc.getElementById('addMail');
-        permissionToNewMailInput = true;
-        SomeMailNumerator2 = tmpArrReCall.mail.length;
-        addMail.addEventListener('click', newMailInput);
-
-        //Действия кнопки [-] Mail
-        let removeMail = doc.getElementById('removeMail');
-        removeMail.addEventListener('click', removeMailInput);
-
-        //Валидация Mail input
-        inputMail.addEventListener('input', oldMailValidation);
+        let inputMail = doc.getElementById('inputMail');
+        addMail.addEventListener('click', addnewmail);
 
         //Подсказка на Name
-        // let nameZone = doc.getElementById('name');
-        nameZone.addEventListener('input', hintName);
+        let nameInput = doc.getElementById('name');
+        nameInput.addEventListener('input', hintName);
 
         //Подсказка на Lastname
-        // let lastnameZone = doc.getElementById('lastname');
-        lastnameZone.addEventListener('input', hintLastname);
+        let lastnameInput = doc.getElementById('lastname');
+        lastnameInput.addEventListener('input', hintLastname);
 
         //Подсказка на Phone
-        let phoneZone = doc.getElementById('phone1');
+        let phoneZone = doc.getElementById('phone');
         phoneZone.addEventListener('input', hintPhone);
+
+        let name = document.getElementById("name").value;
+        let lastname = document.getElementById("lastname").value;
+        tmparr = { name: name,
+            lastname: lastname,
+            phone: [],
+            mail: []
+        };
     };
 
     contactListID .addEventListener('click', showContact);
@@ -521,8 +748,10 @@
     //КНОПОЧКИ
     //ДЕЙСТВИЯ ПО КНОПКЕ "CLOSE"---------------------------------------
     let closeContact = function () {
-        someMailNumerator = 1;
-        somePhoneNumerator = 1;
+        someMailNumerator = 0;
+        somePhoneNumerator = 0;
+        tmpPhoneArr = [];
+        tmpMailArr = [];
         let closeW = doc.getElementById('newContact');
         let closeB = doc.getElementById('backing');
         closeW.remove();
@@ -533,7 +762,6 @@
     let removeContact = function () {
         if (control.length > 1){
             for (var x=0; x<control.length; x++) {
-                // console.log(control.length, x);
                 parent_block.removeChild(doc.getElementById(x));
             }
             control.splice(tmpID, 1);
@@ -550,156 +778,77 @@
 
     //ДЕЙСТВИЯ ПО КНОПКЕ "SAVE"-----------------------------------------
     let saveContact = function () {
-        let name = document.getElementById("name").value;
-        let lastname = document.getElementById("lastname").value;
-        let phone = document.getElementById("phone1").value;
-        let mail = document.getElementById("mail1").value;
 
+        tmparr.name = document.getElementById("name").value;
+        tmparr.lastname = document.getElementById("lastname").value;
+        tmparr.phone = [];
+        tmparr.mail = [];
 
-        let tmparr = { name: name,
-            lastname: lastname,
-            phone: [phone],
-            mail: [mail]
-        };
+        //Запись изменений PhoneZone в tmparr
+        if (somePhoneNumerator !== 0) {
+            for (let p=0; p<somePhoneNumerator; p++) {
+                let tmpArrPhone = doc.getElementById("phone" + (p+1)).value;
+                if (tmpArrPhone.length > 2) {
+                    tmparr.phone.push(tmpArrPhone);
 
-        let PhoneNumerator = SomePhoneNumerator2;
-        if (PhoneNumerator > 1) {
-            for (var i=2; i<=PhoneNumerator; i++) {
-                var tmpPhone = doc.getElementById("phone" + i).value;
-                if (tmpPhone.length > 2) {
-                    tmparr.phone.push(tmpPhone);
+                }
+            }
+        }
+        //Запись изменений MailZone в tmparr
+        if (someMailNumerator !== 0) {
+            for (let m=0; m<someMailNumerator; m++) {
+
+                let tmpArrMail = doc.getElementById("mail" + (m+1)).value;
+                var re = /^[\w-\.]+@[\w-]+\.[a-z]{2,4}$/i;
+                mailValidation = re.test(tmpArrMail);
+                // return mailValidation;
+
+                if (mailValidation === true){
+                    tmparr.mail.push(tmpArrMail);
+                } else {
+                    doc.getElementById('mail' + (m+1)).style.backgroundColor = '#f1bdbd';
                 }
             }
         }
 
-        // let MailNumerator = SomeMailNumerator2+1;
-        let MailNumerator = SomeMailNumerator2;
-        if (MailNumerator > 1) {
-            for (var i=2; i<=MailNumerator; i++) {
-                var tmpMail = doc.getElementById("mail" + i).value;
-                if (tmpMail !== '') {
-                    tmparr.mail.push(tmpMail);
-                }
-            }
-        }
-
-        //Условие на пропуск первого поля mail
-        if (tmparr.mail.length != 1 && tmparr.mail[0] == '') {
-            tmparr.mail.shift();
-        }
-
+        //Условия на Совпадение контактов(по name, lastname)
         let contactValidation = 1;
-        if ((tmparr.name.toLowerCase() +' '+ tmparr.lastname.toLowerCase()) !== (control[tmpID].name.toLowerCase() +' '+ control[tmpID].lastname.toLowerCase())){
-        for (var i = 0; i<control.length; i++) {
-            let tmpContactData = control[i].name.toLowerCase() +' '+ control[i].lastname.toLowerCase();
-            let tmpContactValue = tmparr.name.toLowerCase() +' '+ tmparr.lastname.toLowerCase();
-            // console.log(tmpContactValue +'  '+tmpContactData+'  '+contactValidation);
-            if (tmpContactData === tmpContactValue) {
-                contactValidation = 0;
-                Prevention();
+        if ((tmparr.name.toLowerCase() +' '+ tmparr.lastname.toLowerCase()) !== (control[tmpID].name.toLowerCase() +' '+ control[tmpID].lastname.toLowerCase())) {
+            for (var i = 0; i < control.length; i++) {
+                let tmpContactData = control[i].name.toLowerCase() + ' ' + control[i].lastname.toLowerCase();
+                let tmpContactValue = tmparr.name.toLowerCase() + ' ' + tmparr.lastname.toLowerCase();
+                if (tmpContactData === tmpContactValue) {
+                    //Нашли совпадение!!!  Убираем розрешение на сохранение(contactValidation = 0) и уведомляем пользователя
+                    contactValidation = 0;
+                    Prevention();
+                    doc.getElementById('name').style.backgroundColor = '#f1bdbd';
+                    doc.getElementById('lastname').style.backgroundColor = '#f1bdbd';
+                    setTimeout(function () {
+                        doc.getElementById('name').style.backgroundColor = '#97D696';
+                    }, 2000);
+                    setTimeout(function () {
+                        doc.getElementById('lastname').style.backgroundColor = '#97D696';
+                    }, 2000);
                 }
             }
         }
 
-
-        //Собственно само условие!
-        if (name.length >=2 && lastname.length >=2 && phone.length >= 3 && contactValidation !== 0 && mailCorrect === true) {
-
-            //Перезапись ключа в localStorage
+        // Сохранение
+        if (tmparr.name.length >=2 && tmparr.lastname.length >=2 && tmparr.phone.length > 0 && contactValidation === 1) {
             control[tmpID] = tmparr;
             localStorage.setItem('controlKey', JSON.stringify(control));
 
-            if (control.length >= 1){
-                refreshContact();
+            tmpPhoneArr = [];
+            tmpMailArr = [];
+            if (control.length >= 1) {
+                refreshContact2();
             }
+            closeContact();
+            popupSaveComplete();
+
+            somePhoneNumerator = 0;
+            someMailNumerator = 0;
             control = JSON.parse(localStorage.getItem('controlKey'));
-            closeContact();  //закрытие окна контакта
-            popupSaveComplete()
-        }
-    };
-
-    let oldMailValidation = function (e) {
-        var e = e || event;
-        var target = e.target || e.srcElement;
-        tmpMailID = target.id;
-        let mail = doc.getElementById(tmpMailID);
-        // console.log(tmpMailID);
-        // console.log(mail.value);
-
-        if (mail.value.indexOf('@') > 0 && mail.value.indexOf('.') > mail.value.indexOf('@') +1 && mail.value.length > mail.value.indexOf('.') +2) {
-            mailCorrect = true;
-            permissionToNewMailInput = true;
-            doc.getElementById('mail' + SomeMailNumerator2).style.backgroundColor = '#97d696';
-        } else if (mail.value == '') {
-            mailCorrect = true;
-            permissionToNewMailInput = false;
-            doc.getElementById('mail' + SomeMailNumerator2).style.backgroundColor = 'white';
-        } else {
-            mailCorrect = false;
-            permissionToNewMailInput = false;
-            doc.getElementById('mail' + SomeMailNumerator2).style.backgroundColor = '#f1bdbd';
-        }
-    };
-
-    //ДЕЙСТВИЯ ПО КНОПКЕ [+] Phone
-    let newPhoneInput = function () {
-        if (doc.getElementById("phone" + SomePhoneNumerator2).value.length > 2) {
-            SomePhoneNumerator2++;
-            let somePhone = "phone" + SomePhoneNumerator2;
-            // console.log(somePhone);
-
-            let newInput = doc.createElement('input');
-            newInput.id = somePhone;
-            newInput.placeholder = somePhone;
-            newInput.className = 'input_zone';
-            newInput.oninput = function () {
-                this.value = this.value.replace(/\D/, '')
-            };
-            newInput.innerHTML = '<input type="tel" name="phone">';
-            inputPhone.appendChild(newInput);
-        }
-    };
-
-    //ДЕЙСТВИЯ ПО КНОПКЕ [-] Phone
-    let removePhoneInput = function () {
-        if (SomePhoneNumerator2>1){
-            let tmpRemovePhone = doc.getElementById("phone"+SomePhoneNumerator2);
-            tmpRemovePhone.remove();
-            SomePhoneNumerator2--;
-        }
-    };
-
-    //Действия кнопки [+] Mail
-    let newMailInput = function () {
-        if (permissionToNewMailInput === true) {
-            permissionToNewMailInput = false;
-            let secondMailInput = doc.getElementById('mail2');
-            SomeMailNumerator2++;
-            // console.log(SomeMailNumerator2, secondMailInput);
-            let someMail = "mail" + SomeMailNumerator2;
-            let readOnlyMail = "mail" + (SomeMailNumerator2 - 1);
-            // console.log(readOnlyMail);
-            document.getElementById(readOnlyMail).readOnly = true;
-
-            let newInput = doc.createElement('input');
-            newInput.id = someMail;
-            newInput.placeholder = someMail;
-            newInput.className = 'input_zone';
-            newInput.setAttribute('input', oldMailValidation);
-            newInput.innerHTML = '<input type="email" name="mail">';
-            inputMail.appendChild(newInput);
-        }
-    };
-
-    //Действия кнопки [-] Mail
-    let removeMailInput = function () {
-        if (SomeMailNumerator2 > 1) {
-            let tmpRemoveMail = doc.getElementById("mail" + SomeMailNumerator2);
-            tmpRemoveMail.remove();
-            SomeMailNumerator2--;
-            // console.log(SomeMailNumerator2);
-        } else {
-            doc.getElementById('mail1').readOnly = false;
         }
     };
 

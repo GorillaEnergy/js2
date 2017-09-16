@@ -33,7 +33,7 @@
     top: 40px;
     left: 80px;
     background-color: #27982b;
-    z-index: 1;
+    z-index: 2;
     padding: 7px 0px 0px 11px;
     display: none;
 }
@@ -48,7 +48,7 @@
     top: 40px;
     left: 80px;
     background-color: #27982b;
-    z-index: 3;
+    z-index: 2;
     padding: 7px 0px 0px 20px;
     display: none;
 }
@@ -116,7 +116,7 @@
     border: 1px solid #4b4b4b;
     margin: -1px 0 0 -1px;
     position: absolute;
-    z-index: 2;
+    z-index: 1;
 }
 .Del_Close_Save {
     width: 100%;
@@ -125,7 +125,6 @@
     width: 40px;
     height: 40px;
     border-radius: 5px;
-    /*background-color: #a40000;*/
     font-size: 20px;
     margin: 5px 5px;
     float: left;
@@ -146,10 +145,19 @@
     margin: 5px 5px;
     float: right;
 }
+.add_new_phone_mail {
+    box-sizing: border-box;
+    width: 70px;
+    height: 45px;
+    border-radius: 5px;
+    font-size: 20px;
+    margin: 12px 0 10px 10px;
+}
 .new_phone_mail {
     border-radius: 5px;
-    margin: 11px 0 9px 5px;
-    width: 33px;
+    margin: 10px 0 10px 10px;
+    width: 45px;
     height: 45px;
-    font-size: 25px;
+    font-size: 35px;
+    visibility: hidden;
 }

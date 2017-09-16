@@ -11,19 +11,23 @@
 </head>
 <body>
     <div class="parent_block clearfix" id="main_block">
+
         <div class="header clearfix" id="header">
             <input type="search" name="search" class="input_zone" id="search" placeholder="Search">
-            <button class="add_contact" type="button" id="add">
+            <button class="add_contact" type="button" id="add" name="add">
                 <i class="fa fa-user-plus" aria-hidden="true" style="font-size: 20px"></i>
             </button>
             <div class="complete" id="saveComplete"> Saved successfully</div>
             <div class="complete" id="removeComplete"> Remove successfully</div>
             <div class="prevention" id="prevention">User already exists</div>
+            <div class="prevention" id="PhoneValidation">Phone already exists</div>
+            <div class="prevention" id="MailValidation">Mail already exists</div>
         </div>
 
         <div class="parent_block clearfix" id="parent_block">
             <!-- Сюда будут вставлятся контакты -->
         </div>
+
     </div>
 
 <script src="js/index.js"></script>
